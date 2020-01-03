@@ -32,8 +32,7 @@ public class SequenceLocalAlignment extends SequenceGlobalAlignment{
     }
 
     private int SimilarBetweenElements(String a, String b){
-        int cost = similarityTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
-        return cost;
+        return similarityTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
     }
 
     private MainTableElement findMax(int i, int j){
@@ -73,11 +72,11 @@ public class SequenceLocalAlignment extends SequenceGlobalAlignment{
         int counter = 0;
         while(continueCondition(list)){
             localResult = list.get(counter);
-            int x = localResult.get(localResult.size()-1).x;
-            int y = localResult.get(localResult.size()-1).y;
+            int x = localResult.get(localResult.size()-1).getX();
+            int y = localResult.get(localResult.size()-1).getY();
             while(mainTable[x][y].getValue() != 0){
                 int edgesCounter = 0;
-                if( table[x][y].isUpEdge()){
+                if( table[x][y].isTopEdge()){
                     actualPoint = new PointInTable(x, y-1);
                     edgesCounter++;
                 }
@@ -105,10 +104,10 @@ public class SequenceLocalAlignment extends SequenceGlobalAlignment{
                     }
                     edgesCounter++;
                 }
-                if(actualPoint.x == (x-1) && actualPoint.y == (y-1)){
+                if(actualPoint.getX() == (x-1) && actualPoint.getY() == (y-1)){
                     x--;
                     y--;
-                } else  if(actualPoint.x == x && actualPoint.y == (y-1)){
+                } else  if(actualPoint.getX() == x && actualPoint.getY() == (y-1)){
                     y--;
                 } else {
                     x--;
@@ -134,11 +133,11 @@ public class SequenceLocalAlignment extends SequenceGlobalAlignment{
         for (ArrayList<PointInTable> list : lists) {
             String firstOutput = "";
             String secondOutput = "";
-            resent_x = list.get(0).x;
-            resent_y = list.get(0).y;
+            resent_x = list.get(0).getX();
+            resent_y = list.get(0).getY();
             for (PointInTable point : list) {
-                actual_x = point.x;
-                actual_y = point.y;
+                actual_x = point.getX();
+                actual_y = point.getY();
                 if(actual_x!=firstSequenceLength ||  actual_y!=secondSequenceLength) {
 
                     if (resent_x == actual_x) {
@@ -171,7 +170,7 @@ public class SequenceLocalAlignment extends SequenceGlobalAlignment{
         if(lists.isEmpty()) return true;
         for(ArrayList<PointInTable> list : lists){
             PointInTable lastPoint = list.get(list.size()-1);
-            if(mainTable[lastPoint.x][lastPoint.y].getValue() != 0){
+            if(mainTable[lastPoint.getX()][lastPoint.getY()].getValue() != 0){
                 return true;
             }
         }

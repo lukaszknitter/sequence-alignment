@@ -148,11 +148,11 @@ public class SequenceGlobalAlignmentWithPenalty {
 		int counter = 0;
 		while (continueCondition(list)) {
 			localResult = list.get(counter);
-			x = localResult.get(localResult.size() - 1).x;
-			y = localResult.get(localResult.size() - 1).y;
+			x = localResult.get(localResult.size() - 1).getX();
+			y = localResult.get(localResult.size() - 1).getY();
 			while (x != 0 && y != 0) {
 				int edgesCounter = 0;
-				if (table[x][y].isUpEdge()) {
+				if (table[x][y].isTopEdge()) {
 					actualPoint = new PointInTable(x, y - 1);
 					edgesCounter++;
 				}
@@ -180,10 +180,10 @@ public class SequenceGlobalAlignmentWithPenalty {
 					}
 					edgesCounter++;
 				}
-				if (actualPoint.x == (x - 1) && actualPoint.y == (y - 1)) {
+				if (actualPoint.getX() == (x - 1) && actualPoint.getY() == (y - 1)) {
 					x--;
 					y--;
-				} else if (actualPoint.x == x && actualPoint.y == (y - 1)) {
+				} else if (actualPoint.getX() == x && actualPoint.getY() == (y - 1)) {
 					y--;
 				} else {
 					x--;
@@ -202,7 +202,7 @@ public class SequenceGlobalAlignmentWithPenalty {
 	private boolean continueCondition(ArrayList<ArrayList<PointInTable>> lists) {
 		if (lists.isEmpty()) return true;
 		for (ArrayList<PointInTable> list : lists) {
-			if (list.get(list.size() - 1).x != 0 && list.get(list.size() - 1).y != 0) {
+			if (list.get(list.size() - 1).getX() != 0 && list.get(list.size() - 1).getY() != 0) {
 				return true;
 			}
 		}
@@ -231,8 +231,8 @@ public class SequenceGlobalAlignmentWithPenalty {
 			String firstOutput = "";
 			String secondOutput = "";
 			for (PointInTable point : list) {
-				actual_x = point.x;
-				actual_y = point.y;
+				actual_x = point.getX();
+				actual_y = point.getY();
 				if (actual_x != firstSequenceLength || actual_y != secondSequenceLength) {
 
 					if (recent_x == actual_x) {
@@ -267,14 +267,5 @@ public class SequenceGlobalAlignmentWithPenalty {
 			resultsList.add(secondOutput);
 		}
 		return resultsList;
-	}
-
-	protected class PointInTable {
-		int x;
-		int y;
-		public PointInTable(int x, int y) {
-			this.x = x;
-			this.y = y;
-		}
 	}
 }

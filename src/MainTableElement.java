@@ -1,25 +1,30 @@
 class MainTableElement {
 	private int value;
-	private boolean[] direction;
+	private boolean leftEdge;
+	private boolean topEdge;
+	private boolean diagonalEdge;
 
-	MainTableElement(int v, boolean leftValue, boolean upValue, boolean diagonalValue) {
+	MainTableElement(int v, boolean leftValue, boolean topValue, boolean diagonalValue) {
 		value = v;
-		this.direction = new boolean[]{leftValue, upValue, diagonalValue};
+		leftEdge = leftValue;
+		topEdge = topValue;
+		diagonalEdge = diagonalValue;
+	}
+
+	boolean isLeftEdge() {
+		return leftEdge;
+	}
+
+	boolean isTopEdge() {
+		return topEdge;
+	}
+
+	boolean isDiagonalEdge() {
+		return diagonalEdge;
 	}
 
 	int getValue() {
 		return value;
 	}
 
-	boolean isLeftEdge() {
-		return direction[0];
-	}
-
-	boolean isUpEdge() {
-		return direction[1];
-	}
-
-	boolean isDiagonalEdge() {
-		return direction[2];
-	}
 }
