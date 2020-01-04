@@ -28,9 +28,9 @@ public class SequenceGlobalAlignmentWithPenalty {
 	public void doStuff() throws IOException {
 		readAndInitData();
 		countTables();
-		printTable(S);
+		Utils.printTable(S);
 		countResults(S, resultList);
-		printResults(resultList);
+		Utils.printResults(getResultsList(resultList));
 	}
 
 	private int penaltyFunction(int n) {
@@ -38,8 +38,7 @@ public class SequenceGlobalAlignmentWithPenalty {
 	}
 
 	protected int SimilarityBetweenElements(String a, String b) {
-		int similarity = similarityTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
-		return similarity;
+		return similarityTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
 	}
 
 	public void countTables() {
@@ -120,24 +119,6 @@ public class SequenceGlobalAlignmentWithPenalty {
 		secondSequenceLength = secondSequence.length();
 	}
 
-	public void printTable(MainTableElement[][] table) {
-		System.out.println("Main global table:");
-		System.out.println("--------------------------");
-		String value, separator;
-		for (int i = 0; i < table[0].length; i++) {
-			for (int j = 0; j < table.length; j++) {
-				value = "" + table[j][i].getValue();
-				separator = "";
-				for (int k = value.length(); k < 5; k++) {
-					separator = separator + " ";
-				}
-				System.out.print(value + separator);
-			}
-			System.out.println("");
-		}
-		System.out.println("--------------------------");
-	}
-
 	public void countResults(MainTableElement[][] table, ArrayList<ArrayList<PointInTable>> list) {
 		ArrayList<PointInTable> localResult = new ArrayList<>();
 		int x = firstSequenceLength;
@@ -207,18 +188,6 @@ public class SequenceGlobalAlignmentWithPenalty {
 			}
 		}
 		return false;
-	}
-
-	public void printResults(ArrayList<ArrayList<PointInTable>> lists) {
-		ArrayList<String> resultsList = getResultsList(lists);
-		System.out.println("Global results: " + resultsList.size() / 2);
-		System.out.println("--------------------------");
-		int i = 0;
-		for (String item : resultsList) {
-			System.out.println(item);
-			if (i++ % 2 == 1) System.out.println("--------");
-		}
-		System.out.println("--------------------------");
 	}
 
 	public ArrayList<String> getResultsList(ArrayList<ArrayList<PointInTable>> lists) {

@@ -27,9 +27,9 @@ public class SequenceGlobalAlignment {
 	public void doStuff() throws IOException {
 		readAndInitData();
 		countTable();
-		printTable(mainTable);
+		Utils.printTable(mainTable);
 		countResults(mainTable, resultList);
-		printResults(resultList);
+		Utils.printResults(getResultsList(resultList));
 	}
 
 	public void readAndInitData() throws IOException {
@@ -39,7 +39,7 @@ public class SequenceGlobalAlignment {
 		secondSequence = scanner.nextLine();
 
 		ALPHABET_LENGTH = scanner.nextInt();
-		rnaToAminoAcids = Boolean.valueOf(scanner.next());
+		rnaToAminoAcids = Boolean.parseBoolean(scanner.next());
 
 		costTable = new int[ALPHABET_LENGTH][ALPHABET_LENGTH];
 		similarityTable = new int[ALPHABET_LENGTH][ALPHABET_LENGTH];
@@ -99,7 +99,6 @@ public class SequenceGlobalAlignment {
 		return costTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
 	}
 
-
 	private MainTableElement findMin(int i, int j) {
 		String actualCharFirstSq = Character.toString(firstSequence.charAt(i - 1));
 		String actualCharSecondSq = Character.toString(secondSequence.charAt(j - 1));
@@ -114,18 +113,6 @@ public class SequenceGlobalAlignment {
 		int value = Math.min(diagonalCost, Math.min(left, up));
 
 		return new MainTableElement(value, left == value, up == value, diagonalCost == value);
-	}
-
-	public void printTable(MainTableElement[][] table) {
-		System.out.println("Main global table:");
-		System.out.println("--------------------------");
-		for (int i = 0; i < table[0].length; i++) {
-			for (int j = 0; j < table.length; j++) {
-				System.out.print(table[j][i].getValue() + " ");
-			}
-			System.out.println("");
-		}
-		System.out.println("--------------------------");
 	}
 
 	public void countResults(MainTableElement[][] table, ArrayList<ArrayList<PointInTable>> list) {
@@ -187,18 +174,6 @@ public class SequenceGlobalAlignment {
 			}
 			counter++;
 		}
-	}
-
-	public void printResults(ArrayList<ArrayList<PointInTable>> lists) {
-		ArrayList<String> resultsList = getResultsList(lists);
-		System.out.println("Global results: " + resultsList.size() / 2);
-		System.out.println("--------------------------");
-		int i = 0;
-		for (String item : resultsList) {
-			System.out.println(item);
-			if (i++ % 2 == 1) System.out.println("--------");
-		}
-		System.out.println("--------------------------");
 	}
 
 	public ArrayList<String> getResultsList(ArrayList<ArrayList<PointInTable>> lists) {
