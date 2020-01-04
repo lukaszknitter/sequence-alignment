@@ -1,30 +1,31 @@
-class MainTableElement {
+package feature;
+
+public class MainTableElement {
 	private int value;
 	private boolean leftEdge;
 	private boolean topEdge;
 	private boolean diagonalEdge;
 
-	MainTableElement(int v, boolean leftValue, boolean topValue, boolean diagonalValue) {
+	public MainTableElement(int v, boolean leftValue, boolean topValue, boolean diagonalValue) {
 		value = v;
 		leftEdge = leftValue;
 		topEdge = topValue;
 		diagonalEdge = diagonalValue;
 	}
 
-	boolean isLeftEdge() {
+	public boolean isLeftEdge() {
 		return leftEdge;
 	}
 
-	boolean isTopEdge() {
+	public boolean isTopEdge() {
 		return topEdge;
 	}
 
-	boolean isDiagonalEdge() {
+	public boolean isDiagonalEdge() {
 		return diagonalEdge;
 	}
 
-	int getValue() {
+	public int getValue() {
 		return value;
 	}
-
 }

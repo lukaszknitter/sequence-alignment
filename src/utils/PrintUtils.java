@@ -1,7 +1,11 @@
+package utils;
+
+import feature.MainTableElement;
+
 import java.util.ArrayList;
 
-class PrintUtils {
-	static void printTable(MainTableElement[][] table) {
+public class PrintUtils {
+	public static void printTable(MainTableElement[][] table) {
 		System.out.println("Main global table:");
 		System.out.println("--------------------------");
 		for (int i = 0; i < table[0].length; i++) {
@@ -13,7 +17,7 @@ class PrintUtils {
 		System.out.println("--------------------------");
 	}
 
-	static void printResults(ArrayList<String> resultsList) {
+	public static void printResults(ArrayList<String> resultsList) {
 		System.out.println("Global results: " + resultsList.size() / 2);
 		System.out.println("--------------------------");
 		int i = 0;

@@ -1,49 +1,60 @@
+package algorithms;
+
+import data.Data;
+import feature.MainTableElement;
+import feature.PointInTable;
+import utils.PrintUtils;
+import utils.SequenceUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
-
-public class SequenceLocalAlignment {
-	private int max;
+public class SequenceGlobalAlignment {
 	private Data data;
 	private MainTableElement[][] mainTable;
 
-	public SequenceLocalAlignment(String filePath) throws IOException {
+	public SequenceGlobalAlignment(String filePath) throws IOException {
 		this.data = new Data(filePath);
 	}
 
-	public void doStuff(){
+	public void compute() {
 		fillScoringTable();
 		PrintUtils.printTable(mainTable);
-		final ArrayList<ArrayList<PointInTable>> resultList = countResults();
-		PrintUtils.printResults(getResultsList(resultList));
+		final ArrayList<ArrayList<PointInTable>> resultsList = calculateResults();
+		final ArrayList<String> resultsStringList = stringifyResultsList(resultsList);
+		PrintUtils.printResults(resultsStringList);
 	}
 
-	public void fillScoringTable() {
+	private void fillScoringTable() {
 		final int firstSequenceLength = data.firstSequenceLength;
 		final int secondSequenceLength = data.secondSequenceLength;
+		final String firstSequence = data.firstSequence;
+		final String secondSequence = data.secondSequence;
+		final ArrayList<String> alphabet = data.alphabet;
+		final int ALPHABET_LENGTH = data.ALPHABET_LENGTH;
+		final int[][] costTable = data.costTable;
 
 		mainTable = new MainTableElement[firstSequenceLength + 1][secondSequenceLength + 1];
 		mainTable[0][0] = new MainTableElement(0, false, false, false);
 
 		for (int i = 1; i < secondSequenceLength + 1; i++) {
-			mainTable[0][i] = new MainTableElement(0, false, false, false);
+			String actualChar = Character.toString(secondSequence.charAt(i - 1));
+			int value = mainTable[0][i - 1].getValue() + costTable[alphabet.indexOf(actualChar)][ALPHABET_LENGTH - 1];
+			mainTable[0][i] = new MainTableElement(value, false, true, false);
 		}
-
 		for (int i = 1; i < firstSequenceLength + 1; i++) {
-			mainTable[i][0] = new MainTableElement(0, false, false, false);
+			String actualChar = Character.toString(firstSequence.charAt(i - 1));
+			int value = mainTable[i - 1][0].getValue() + costTable[ALPHABET_LENGTH - 1][alphabet.indexOf(actualChar)];
+			mainTable[i][0] = new MainTableElement(value, true, false, false);
 		}
-
-		MainTableElement max;
 		for (int i = 1; i < firstSequenceLength + 1; i++) {
 			for (int j = 1; j < secondSequenceLength + 1; j++) {
-				max = findMax(i, j);
-				mainTable[i][j] = max;
-				if (max.getValue() >= this.max) this.max = max.getValue();
+				mainTable[i][j] = findMin(i, j);
 			}
 		}
 	}
 
-	private MainTableElement findMax(int i, int j) {
+	private MainTableElement findMin(int i, int j) {
 		String actualCharFirstSq = Character.toString(data.firstSequence.charAt(i - 1));
 		String actualCharSecondSq = Character.toString(data.secondSequence.charAt(j - 1));
 
@@ -54,34 +65,27 @@ public class SequenceLocalAlignment {
 		int diagonalCost = costBtwChars + mainTable[i - 1][j - 1].getValue();
 		int left = leftCost + mainTable[i - 1][j].getValue();
 		int up = upCost + mainTable[i][j - 1].getValue();
-		int value = Math.max(Math.max(0, diagonalCost), Math.max(left, up));
-		if (value != 0) {
-			return new MainTableElement(value, left == value, up == value, diagonalCost == value);
-		} else {
-			return new MainTableElement(value, false, false, false);
-		}
+		int value = Math.min(diagonalCost, Math.min(left, up));
+
+		return new MainTableElement(value, left == value, up == value, diagonalCost == value);
 	}
 
-	public ArrayList<ArrayList<PointInTable>> countResults() {
+	private ArrayList<ArrayList<PointInTable>> calculateResults() {
 		ArrayList<ArrayList<PointInTable>> list = new ArrayList<>();
-		ArrayList<PointInTable> localResult;
-		for (int i = data.firstSequenceLength; i >= 0; i--) {
-			for (int j = data.secondSequenceLength; j >= 0; j--) {
-				if (mainTable[i][j].getValue() == this.max) {
-					PointInTable actualPoint = new PointInTable(i, j);
-					localResult = new ArrayList<>();
-					localResult.add(actualPoint);
-					list.add(localResult);
-				}
-			}
-		}
-		PointInTable actualPoint = list.get(0).get(0);
+		ArrayList<PointInTable> localResult = new ArrayList<>();
+		int x = data.firstSequenceLength;
+		int y = data.secondSequenceLength;
+		PointInTable actualPoint = new PointInTable(x, y);
+		localResult.add(actualPoint);
+		list.add(localResult);
+
 		int counter = 0;
 		while (continueCondition(list)) {
 			localResult = list.get(counter);
-			int x = localResult.get(localResult.size() - 1).getX();
-			int y = localResult.get(localResult.size() - 1).getY();
-			while (mainTable[x][y].getValue() != 0) {
+			x = localResult.get(localResult.size() - 1).getX();
+			y = localResult.get(localResult.size() - 1).getY();
+
+			while (x != 0 && y != 0) {
 				int edgesCounter = 0;
 				if (mainTable[x][y].isTopEdge()) {
 					actualPoint = new PointInTable(x, y - 1);
@@ -92,7 +96,6 @@ public class SequenceLocalAlignment {
 						ArrayList<PointInTable> clone = new ArrayList<>(localResult);
 						clone.add(new PointInTable(x - 1, y));
 						list.add(clone);
-
 					} else {
 						actualPoint = new PointInTable(x - 1, y);
 					}
@@ -103,7 +106,6 @@ public class SequenceLocalAlignment {
 						ArrayList<PointInTable> clone = new ArrayList<>(localResult);
 						clone.add(new PointInTable(x - 1, y - 1));
 						list.add(clone);
-
 					} else {
 						actualPoint = new PointInTable(x - 1, y - 1);
 					}
@@ -129,39 +131,54 @@ public class SequenceLocalAlignment {
 		return list;
 	}
 
-	public ArrayList<String> getResultsList(ArrayList<ArrayList<PointInTable>> lists) {
+	private ArrayList<String> stringifyResultsList(ArrayList<ArrayList<PointInTable>> lists) {
+		final int firstSequenceLength = data.firstSequenceLength;
+		final int secondSequenceLength = data.secondSequenceLength;
+		final String firstSequence = data.firstSequence;
+		final String secondSequence = data.secondSequence;
+		final boolean rnaToAminoAcids = data.rnaToAminoAcids;
+
 		ArrayList<String> resultsList = new ArrayList<>();
 
 		int actual_x = 0, actual_y = 0;
-		int resent_x = 0;
-		int resent_y = 0;
+		int recent_x = firstSequenceLength + 1;
+		int recent_y = secondSequenceLength + 1;
 		for (ArrayList<PointInTable> list : lists) {
 			StringBuilder firstOutput = new StringBuilder();
 			StringBuilder secondOutput = new StringBuilder();
-			resent_x = list.get(0).getX();
-			resent_y = list.get(0).getY();
 			for (PointInTable point : list) {
 				actual_x = point.getX();
 				actual_y = point.getY();
-				if (actual_x != data.firstSequenceLength || actual_y != data.secondSequenceLength) {
+				if (actual_x != firstSequenceLength || actual_y != secondSequenceLength) {
 
-					if (resent_x == actual_x) {
+					if (recent_x == actual_x) {
 						firstOutput.append(" ");
 					} else {
-						firstOutput.append(data.firstSequence.charAt(actual_x));
+						firstOutput.append(firstSequence.charAt(actual_x));
 					}
-					if (resent_y == actual_y) {
+					if (recent_y == actual_y) {
 						secondOutput.append(" ");
 					} else {
-						secondOutput.append(data.secondSequence.charAt(actual_y));
+						secondOutput.append(secondSequence.charAt(actual_y));
 					}
 				}
-				resent_x = actual_x;
-				resent_y = actual_y;
+				recent_x = actual_x;
+				recent_y = actual_y;
+
+			}
+			while (actual_x > 0) {
+				actual_x--;
+				secondOutput.append(" ");
+				firstOutput.append(firstSequence.charAt(actual_x));
+			}
+			while (actual_y > 0) {
+				actual_y--;
+				firstOutput.append(" ");
+				secondOutput.append(secondOutput.charAt(actual_y));
 			}
 			firstOutput = new StringBuilder(new StringBuilder(firstOutput.toString()).reverse().toString());
 			secondOutput = new StringBuilder(new StringBuilder(secondOutput.toString()).reverse().toString());
-			if (data.rnaToAminoAcids) {
+			if (rnaToAminoAcids) {
 				firstOutput = new StringBuilder(SequenceUtils.reTranslateSequence(firstOutput.toString()));
 				secondOutput = new StringBuilder(SequenceUtils.reTranslateSequence(secondOutput.toString()));
 			}
@@ -174,8 +191,7 @@ public class SequenceLocalAlignment {
 	private boolean continueCondition(ArrayList<ArrayList<PointInTable>> lists) {
 		if (lists.isEmpty()) return true;
 		for (ArrayList<PointInTable> list : lists) {
-			PointInTable lastPoint = list.get(list.size() - 1);
-			if (mainTable[lastPoint.getX()][lastPoint.getY()].getValue() != 0) {
+			if (list.get(list.size() - 1).getX() != 0 && list.get(list.size() - 1).getY() != 0) {
 				return true;
 			}
 		}

@@ -1,3 +1,5 @@
+package feature;
+
 public enum AminoAcidsTypes {
 	UUU("f"),//("fenyloalanina"),
 	UUC("f"),//("fenyloalanina"),

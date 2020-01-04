@@ -1,3 +1,7 @@
+import algorithms.SequenceGlobalAlignment;
+import algorithms.SequenceGlobalAlignmentWithPenalty;
+import algorithms.SequenceLocalAlignment;
+
 import java.io.IOException;
 
 /**
@@ -10,13 +14,13 @@ import java.io.IOException;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        SequenceGlobalAlignment test = new SequenceGlobalAlignment("resources//test_global.txt");
-        test.doStuff();
+        SequenceGlobalAlignment global = new SequenceGlobalAlignment("resources//test_global.txt");
+        global.compute();
 
-        SequenceLocalAlignment test2 = new SequenceLocalAlignment("resources//test_local.txt");
-        test2.doStuff();
+        SequenceLocalAlignment local = new SequenceLocalAlignment("resources//test_local.txt");
+        local.compute();
 
-        SequenceGlobalAlignmentWithPenalty test3 = new SequenceGlobalAlignmentWithPenalty("resources//test_penalty.txt");
-        test3.doStuff();
+        SequenceGlobalAlignmentWithPenalty globalWithPenalty = new SequenceGlobalAlignmentWithPenalty("resources//test_penalty.txt");
+        globalWithPenalty.compute();
     }
 }

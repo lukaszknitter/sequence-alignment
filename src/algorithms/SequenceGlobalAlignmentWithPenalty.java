@@ -1,19 +1,27 @@
+package algorithms;
+
+import data.PenaltyData;
+import feature.MainTableElement;
+import feature.PointInTable;
+import utils.PrintUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class SequenceGlobalAlignmentWithPenalty {
-	private MainTableElement[][] S;
 	private PenaltyData data;
+	private MainTableElement[][] S;
 
 	public SequenceGlobalAlignmentWithPenalty(String filePath) throws IOException {
 		this.data = new PenaltyData(filePath);
 	}
 
-	public void doStuff() {
+	public void compute() {
 		fillScoringTables();
 		PrintUtils.printTable(S);
-		final ArrayList<ArrayList<PointInTable>> resultList = countResults();
-		PrintUtils.printResults(getResultsList(resultList));
+		final ArrayList<ArrayList<PointInTable>> resultsList = calculateResults();
+		final ArrayList<String> resultsStringList = stringifyResultsList(resultsList);
+		PrintUtils.printResults(resultsStringList);
 	}
 
 	private int penaltyFunction(int n) {
@@ -80,7 +88,7 @@ public class SequenceGlobalAlignmentWithPenalty {
 		return new MainTableElement(max, max == left, max == up, max == diagonal);
 	}
 
-	private ArrayList<ArrayList<PointInTable>> countResults() {
+	private ArrayList<ArrayList<PointInTable>> calculateResults() {
 		ArrayList<ArrayList<PointInTable>> list = new ArrayList<>();
 		ArrayList<PointInTable> localResult = new ArrayList<>();
 		int x = data.firstSequenceLength;
@@ -141,7 +149,7 @@ public class SequenceGlobalAlignmentWithPenalty {
 		return list;
 	}
 
-	private ArrayList<String> getResultsList(ArrayList<ArrayList<PointInTable>> lists) {
+	private ArrayList<String> stringifyResultsList(ArrayList<ArrayList<PointInTable>> lists) {
 		final int firstSequenceLength = data.firstSequenceLength;
 		final int secondSequenceLength = data.secondSequenceLength;
 		final String firstSequence = data.firstSequence;
