@@ -6,7 +6,8 @@ import java.io.IOException;
 
 /**
  * Bioinformatyka
- *
+ * Optymalne zestawienia 2 sekwencji (I + II)
+ * 
  * @author Martyna Gostomska 160408
  * @author Łukasz Knitter 160246
  * @author Tomasz Kononowicz 160839
