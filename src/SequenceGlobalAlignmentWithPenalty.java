@@ -1,51 +1,35 @@
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class SequenceGlobalAlignmentWithPenalty {
+	private MainTableElement[][] S;
+	private PenaltyData data;
 
-	public String filePathString;
-	public String firstSequence;
-	public String secondSequence;
-	protected int[][] C;
-	protected int[][] A;
-	protected int[][] B;
-	protected MainTableElement[][] S;
-	protected int firstSequenceLength;
-	protected int secondSequenceLength;
-	protected int ALPHABET_LENGTH;
-	protected int[][] similarityTable;
-	protected ArrayList<String> alphabet;
-	protected ArrayList<ArrayList<PointInTable>> resultList;
-
-	public SequenceGlobalAlignmentWithPenalty(String filePath) {
-		this.filePathString = filePath;
-		resultList = new ArrayList<>();
+	public SequenceGlobalAlignmentWithPenalty(String filePath) throws IOException {
+		this.data = new PenaltyData(filePath);
 	}
 
-	public void doStuff() throws IOException {
-		readAndInitData();
-		countTables();
-		Utils.printTable(S);
-		countResults(S, resultList);
-		Utils.printResults(getResultsList(resultList));
+	public void doStuff() {
+		fillScoringTables();
+		PrintUtils.printTable(S);
+		final ArrayList<ArrayList<PointInTable>> resultList = countResults();
+		PrintUtils.printResults(getResultsList(resultList));
 	}
 
 	private int penaltyFunction(int n) {
 		return 2 * n;
 	}
 
-	protected int SimilarityBetweenElements(String a, String b) {
-		return similarityTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
-	}
+	private void fillScoringTables() {
+		final int firstSequenceLength = data.firstSequenceLength;
+		final int secondSequenceLength = data.secondSequenceLength;
+		final String firstSequence = data.firstSequence;
+		final String secondSequence = data.secondSequence;
 
-	public void countTables() {
 		S = new MainTableElement[firstSequenceLength + 1][secondSequenceLength + 1];
-		C = new int[firstSequenceLength + 1][firstSequenceLength + 1];
-		A = new int[firstSequenceLength + 1][firstSequenceLength + 1];
-		B = new int[firstSequenceLength + 1][firstSequenceLength + 1];
+		int[][] C = new int[firstSequenceLength + 1][firstSequenceLength + 1];
+		int[][] A = new int[firstSequenceLength + 1][firstSequenceLength + 1];
+		int[][] B = new int[firstSequenceLength + 1][firstSequenceLength + 1];
 
 		S[0][0] = new MainTableElement(0, false, false, false);
 		for (int i = 1; i < firstSequenceLength + 1; i++) {
@@ -65,7 +49,7 @@ public class SequenceGlobalAlignmentWithPenalty {
 			for (int j = 1; j < secondSequenceLength + 1; j++) {
 				String actualCharFirstSq = Character.toString(firstSequence.charAt(i - 1));
 				String actualCharSecondSq = Character.toString(secondSequence.charAt(j - 1));
-				C[i][j] = S[i - 1][j - 1].getValue() + SimilarityBetweenElements(actualCharFirstSq, actualCharSecondSq);
+				C[i][j] = S[i - 1][j - 1].getValue() + data.getSimilarityBetweenElements(actualCharFirstSq, actualCharSecondSq);
 
 				max = -10000;
 				for (int k = 0; k < j; k++) {
@@ -96,33 +80,11 @@ public class SequenceGlobalAlignmentWithPenalty {
 		return new MainTableElement(max, max == left, max == up, max == diagonal);
 	}
 
-
-	public void readAndInitData() throws IOException {
-		Path filePath = Paths.get(filePathString);
-		Scanner scanner = new Scanner(filePath);
-		firstSequence = scanner.nextLine();
-		secondSequence = scanner.nextLine();
-
-		ALPHABET_LENGTH = scanner.nextInt();
-
-		similarityTable = new int[ALPHABET_LENGTH][ALPHABET_LENGTH];
-		for (int i = 0; i < ALPHABET_LENGTH; i++) {
-			for (int j = 0; j < ALPHABET_LENGTH; j++) {
-				similarityTable[i][j] = scanner.nextInt();
-			}
-		}
-
-		alphabet = new ArrayList<>();
-		for (int i = 0; i < ALPHABET_LENGTH; i++) alphabet.add(scanner.next());
-
-		firstSequenceLength = firstSequence.length();
-		secondSequenceLength = secondSequence.length();
-	}
-
-	public void countResults(MainTableElement[][] table, ArrayList<ArrayList<PointInTable>> list) {
+	private ArrayList<ArrayList<PointInTable>> countResults() {
+		ArrayList<ArrayList<PointInTable>> list = new ArrayList<>();
 		ArrayList<PointInTable> localResult = new ArrayList<>();
-		int x = firstSequenceLength;
-		int y = secondSequenceLength;
+		int x = data.firstSequenceLength;
+		int y = data.secondSequenceLength;
 		PointInTable actualPoint = new PointInTable(x, y);
 		localResult.add(actualPoint);
 		list.add(localResult);
@@ -133,14 +95,13 @@ public class SequenceGlobalAlignmentWithPenalty {
 			y = localResult.get(localResult.size() - 1).getY();
 			while (x != 0 && y != 0) {
 				int edgesCounter = 0;
-				if (table[x][y].isTopEdge()) {
+				if (S[x][y].isTopEdge()) {
 					actualPoint = new PointInTable(x, y - 1);
 					edgesCounter++;
 				}
-				if (table[x][y].isLeftEdge()) {
+				if (S[x][y].isLeftEdge()) {
 					if (edgesCounter != 0) {
-						ArrayList<PointInTable> clone = new ArrayList<>();
-						for (PointInTable item : localResult) clone.add(item);
+						ArrayList<PointInTable> clone = new ArrayList<>(localResult);
 						clone.add(new PointInTable(x - 1, y));
 						list.add(clone);
 
@@ -149,10 +110,9 @@ public class SequenceGlobalAlignmentWithPenalty {
 					}
 					edgesCounter++;
 				}
-				if (table[x][y].isDiagonalEdge()) {
+				if (S[x][y].isDiagonalEdge()) {
 					if (edgesCounter != 0) {
-						ArrayList<PointInTable> clone = new ArrayList<>();
-						for (PointInTable item : localResult) clone.add(item);
+						ArrayList<PointInTable> clone = new ArrayList<>(localResult);
 						clone.add(new PointInTable(x - 1, y - 1));
 						list.add(clone);
 
@@ -178,6 +138,60 @@ public class SequenceGlobalAlignmentWithPenalty {
 			}
 			counter++;
 		}
+		return list;
+	}
+
+	private ArrayList<String> getResultsList(ArrayList<ArrayList<PointInTable>> lists) {
+		final int firstSequenceLength = data.firstSequenceLength;
+		final int secondSequenceLength = data.secondSequenceLength;
+		final String firstSequence = data.firstSequence;
+		final String secondSequence = data.secondSequence;
+
+		ArrayList<String> resultsList = new ArrayList<>();
+
+		int actual_x = 0, actual_y = 0;
+		int recent_x = firstSequenceLength + 1;
+		int recent_y = secondSequenceLength + 1;
+		for (ArrayList<PointInTable> list : lists) {
+			StringBuilder firstOutput = new StringBuilder();
+			StringBuilder secondOutput = new StringBuilder();
+			for (PointInTable point : list) {
+				actual_x = point.getX();
+				actual_y = point.getY();
+				if (actual_x != firstSequenceLength || actual_y != secondSequenceLength) {
+
+					if (recent_x == actual_x) {
+						firstOutput.append(" ");
+					} else {
+						firstOutput.append(firstSequence.charAt(actual_x));
+					}
+					if (recent_y == actual_y) {
+						secondOutput.append(" ");
+					} else {
+						secondOutput.append(secondSequence.charAt(actual_y));
+					}
+				}
+				recent_x = actual_x;
+				recent_y = actual_y;
+
+			}
+			while (actual_x > 0) {
+				actual_x--;
+				secondOutput.append(" ");
+				firstOutput.append(firstSequence.charAt(actual_x));
+			}
+			while (actual_y > 0) {
+				actual_y--;
+				firstOutput.append(" ");
+				secondOutput.append(secondSequence.charAt(actual_y));
+			}
+			firstOutput = new StringBuilder(new StringBuilder(firstOutput.toString()).reverse().toString());
+			secondOutput = new StringBuilder(new StringBuilder(secondOutput.toString()).reverse().toString());
+
+			resultsList.add(firstOutput.toString());
+			resultsList.add(secondOutput.toString());
+		}
+		return resultsList;
 	}
 
 	private boolean continueCondition(ArrayList<ArrayList<PointInTable>> lists) {
@@ -188,53 +202,5 @@ public class SequenceGlobalAlignmentWithPenalty {
 			}
 		}
 		return false;
-	}
-
-	public ArrayList<String> getResultsList(ArrayList<ArrayList<PointInTable>> lists) {
-		ArrayList<String> resultsList = new ArrayList<>();
-
-		int actual_x = 0, actual_y = 0;
-		int recent_x = firstSequenceLength + 1;
-		int recent_y = secondSequenceLength + 1;
-		for (ArrayList<PointInTable> list : lists) {
-			String firstOutput = "";
-			String secondOutput = "";
-			for (PointInTable point : list) {
-				actual_x = point.getX();
-				actual_y = point.getY();
-				if (actual_x != firstSequenceLength || actual_y != secondSequenceLength) {
-
-					if (recent_x == actual_x) {
-						firstOutput = firstOutput + (" ");
-					} else {
-						firstOutput = firstOutput + (firstSequence.charAt(actual_x));
-					}
-					if (recent_y == actual_y) {
-						secondOutput = secondOutput + (" ");
-					} else {
-						secondOutput = secondOutput + (secondSequence.charAt(actual_y));
-					}
-				}
-				recent_x = actual_x;
-				recent_y = actual_y;
-
-			}
-			while (actual_x > 0) {
-				actual_x--;
-				secondOutput = secondOutput + (" ");
-				firstOutput = firstOutput + (firstSequence.charAt(actual_x));
-			}
-			while (actual_y > 0) {
-				actual_y--;
-				firstOutput = firstOutput + (" ");
-				secondOutput = secondOutput + (secondSequence.charAt(actual_y));
-			}
-			firstOutput = new StringBuilder(firstOutput).reverse().toString();
-			secondOutput = new StringBuilder(secondOutput).reverse().toString();
-
-			resultsList.add(firstOutput);
-			resultsList.add(secondOutput);
-		}
-		return resultsList;
 	}
 }

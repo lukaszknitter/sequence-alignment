@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-class Utils {
+class PrintUtils {
 	static void printTable(MainTableElement[][] table) {
 		System.out.println("Main global table:");
 		System.out.println("--------------------------");

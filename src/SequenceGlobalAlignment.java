@@ -1,80 +1,30 @@
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
 
 public class SequenceGlobalAlignment {
-	public String filePathString;
-	public String firstSequence;
-	public String secondSequence;
-	protected int[][] costTable;
-	protected int[][] similarityTable;
-	protected ArrayList<String> alphabet;
-	protected MainTableElement[][] mainTable;
-	protected int firstSequenceLength;
-	protected int secondSequenceLength;
-	protected ArrayList<ArrayList<PointInTable>> resultList;
-	protected int ALPHABET_LENGTH;
-	protected boolean rnaToAminoAcids;
+	private Data data;
+	private MainTableElement[][] mainTable;
 
-	public SequenceGlobalAlignment(String filePath) {
-		this.filePathString = filePath;
-		resultList = new ArrayList<>();
+	public SequenceGlobalAlignment(String filePath) throws IOException {
+		this.data = new Data(filePath);
 	}
 
-	public void doStuff() throws IOException {
-		readAndInitData();
-		countTable();
-		Utils.printTable(mainTable);
-		countResults(mainTable, resultList);
-		Utils.printResults(getResultsList(resultList));
+	public void doStuff() {
+		fillScoringTable();
+		PrintUtils.printTable(mainTable);
+		final ArrayList<ArrayList<PointInTable>> resultList = countResults();
+		PrintUtils.printResults(getResultsList(resultList));
 	}
 
-	public void readAndInitData() throws IOException {
-		Path filePath = Paths.get(filePathString);
-		Scanner scanner = new Scanner(filePath);
-		firstSequence = scanner.nextLine();
-		secondSequence = scanner.nextLine();
+	private void fillScoringTable() {
+		final int firstSequenceLength = data.firstSequenceLength;
+		final int secondSequenceLength = data.secondSequenceLength;
+		final String firstSequence = data.firstSequence;
+		final String secondSequence = data.secondSequence;
+		final ArrayList<String> alphabet = data.alphabet;
+		final int ALPHABET_LENGTH = data.ALPHABET_LENGTH;
+		final int[][] costTable = data.costTable;
 
-		ALPHABET_LENGTH = scanner.nextInt();
-		rnaToAminoAcids = Boolean.parseBoolean(scanner.next());
-
-		costTable = new int[ALPHABET_LENGTH][ALPHABET_LENGTH];
-		similarityTable = new int[ALPHABET_LENGTH][ALPHABET_LENGTH];
-		for (int i = 0; i < ALPHABET_LENGTH; i++) {
-			for (int j = 0; j < ALPHABET_LENGTH; j++) {
-				costTable[i][j] = scanner.nextInt();
-				similarityTable[i][j] = 1 - costTable[i][j];
-			}
-		}
-		alphabet = new ArrayList<>();
-		if (rnaToAminoAcids) {
-			Arrays.asList(AminoAcidsTypes.values()).forEach(aminoAcidType -> {
-				if (!alphabet.contains(aminoAcidType.getAminoAcid()))
-					alphabet.add(aminoAcidType.getAminoAcid());
-			});
-			firstSequence = convertSequence(firstSequence);
-			secondSequence = convertSequence(secondSequence);
-		} else {
-			for (int i = 0; i < ALPHABET_LENGTH - 1; i++) alphabet.add(scanner.next());
-		}
-		alphabet.add(" ");
-
-		firstSequenceLength = firstSequence.length();
-		secondSequenceLength = secondSequence.length();
-	}
-
-	private String convertSequence(String sequence) {
-		StringBuilder convertedSequence = new StringBuilder();
-		for (int i = 0; i < sequence.length(); i += 3) {
-			convertedSequence.append(AminoAcidsTypes.valueOf(sequence.substring(i, i + 3)).getAminoAcid());
-		}
-		return convertedSequence.toString();
-	}
-
-	public void countTable() {
 		mainTable = new MainTableElement[firstSequenceLength + 1][secondSequenceLength + 1];
 		mainTable[0][0] = new MainTableElement(0, false, false, false);
 
@@ -95,17 +45,13 @@ public class SequenceGlobalAlignment {
 		}
 	}
 
-	protected int CostBetweenElements(String a, String b) {
-		return costTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
-	}
-
 	private MainTableElement findMin(int i, int j) {
-		String actualCharFirstSq = Character.toString(firstSequence.charAt(i - 1));
-		String actualCharSecondSq = Character.toString(secondSequence.charAt(j - 1));
+		String actualCharFirstSq = Character.toString(data.firstSequence.charAt(i - 1));
+		String actualCharSecondSq = Character.toString(data.secondSequence.charAt(j - 1));
 
-		int costBtwChars = CostBetweenElements(actualCharFirstSq, actualCharSecondSq);
-		int leftCost = CostBetweenElements(actualCharFirstSq, " ");
-		int upCost = CostBetweenElements(" ", actualCharSecondSq);
+		int costBtwChars = data.getCostBetweenElements(actualCharFirstSq, actualCharSecondSq);
+		int leftCost = data.getCostBetweenElements(actualCharFirstSq, " ");
+		int upCost = data.getCostBetweenElements(" ", actualCharSecondSq);
 
 		int diagonalCost = costBtwChars + mainTable[i - 1][j - 1].getValue();
 		int left = leftCost + mainTable[i - 1][j].getValue();
@@ -115,43 +61,42 @@ public class SequenceGlobalAlignment {
 		return new MainTableElement(value, left == value, up == value, diagonalCost == value);
 	}
 
-	public void countResults(MainTableElement[][] table, ArrayList<ArrayList<PointInTable>> list) {
+	private ArrayList<ArrayList<PointInTable>> countResults() {
+		ArrayList<ArrayList<PointInTable>> list = new ArrayList<>();
 		ArrayList<PointInTable> localResult = new ArrayList<>();
-		int x = firstSequenceLength;
-		int y = secondSequenceLength;
+		int x = data.firstSequenceLength;
+		int y = data.secondSequenceLength;
 		PointInTable actualPoint = new PointInTable(x, y);
 		localResult.add(actualPoint);
 		list.add(localResult);
+
 		int counter = 0;
 		while (continueCondition(list)) {
 			localResult = list.get(counter);
 			x = localResult.get(localResult.size() - 1).getX();
 			y = localResult.get(localResult.size() - 1).getY();
+
 			while (x != 0 && y != 0) {
 				int edgesCounter = 0;
-				if (table[x][y].isTopEdge()) {
+				if (mainTable[x][y].isTopEdge()) {
 					actualPoint = new PointInTable(x, y - 1);
 					edgesCounter++;
 				}
-				if (table[x][y].isLeftEdge()) {
+				if (mainTable[x][y].isLeftEdge()) {
 					if (edgesCounter != 0) {
-						ArrayList<PointInTable> clone = new ArrayList<>();
-						for (PointInTable item : localResult) clone.add(item);
+						ArrayList<PointInTable> clone = new ArrayList<>(localResult);
 						clone.add(new PointInTable(x - 1, y));
 						list.add(clone);
-
 					} else {
 						actualPoint = new PointInTable(x - 1, y);
 					}
 					edgesCounter++;
 				}
-				if (table[x][y].isDiagonalEdge()) {
+				if (mainTable[x][y].isDiagonalEdge()) {
 					if (edgesCounter != 0) {
-						ArrayList<PointInTable> clone = new ArrayList<>();
-						for (PointInTable item : localResult) clone.add(item);
+						ArrayList<PointInTable> clone = new ArrayList<>(localResult);
 						clone.add(new PointInTable(x - 1, y - 1));
 						list.add(clone);
-
 					} else {
 						actualPoint = new PointInTable(x - 1, y - 1);
 					}
@@ -174,31 +119,38 @@ public class SequenceGlobalAlignment {
 			}
 			counter++;
 		}
+		return list;
 	}
 
-	public ArrayList<String> getResultsList(ArrayList<ArrayList<PointInTable>> lists) {
+	private ArrayList<String> getResultsList(ArrayList<ArrayList<PointInTable>> lists) {
+		final int firstSequenceLength = data.firstSequenceLength;
+		final int secondSequenceLength = data.secondSequenceLength;
+		final String firstSequence = data.firstSequence;
+		final String secondSequence = data.secondSequence;
+		final boolean rnaToAminoAcids = data.rnaToAminoAcids;
+
 		ArrayList<String> resultsList = new ArrayList<>();
 
 		int actual_x = 0, actual_y = 0;
 		int recent_x = firstSequenceLength + 1;
 		int recent_y = secondSequenceLength + 1;
 		for (ArrayList<PointInTable> list : lists) {
-			String firstOutput = "";
-			String secondOutput = "";
+			StringBuilder firstOutput = new StringBuilder();
+			StringBuilder secondOutput = new StringBuilder();
 			for (PointInTable point : list) {
 				actual_x = point.getX();
 				actual_y = point.getY();
 				if (actual_x != firstSequenceLength || actual_y != secondSequenceLength) {
 
 					if (recent_x == actual_x) {
-						firstOutput = firstOutput + (" ");
+						firstOutput.append(" ");
 					} else {
-						firstOutput = firstOutput + (firstSequence.charAt(actual_x));
+						firstOutput.append(firstSequence.charAt(actual_x));
 					}
 					if (recent_y == actual_y) {
-						secondOutput = secondOutput + (" ");
+						secondOutput.append(" ");
 					} else {
-						secondOutput = secondOutput + (secondSequence.charAt(actual_y));
+						secondOutput.append(secondSequence.charAt(actual_y));
 					}
 				}
 				recent_x = actual_x;
@@ -207,41 +159,24 @@ public class SequenceGlobalAlignment {
 			}
 			while (actual_x > 0) {
 				actual_x--;
-				secondOutput = secondOutput + (" ");
-				firstOutput = firstOutput + (firstSequence.charAt(actual_x));
+				secondOutput.append(" ");
+				firstOutput.append(firstSequence.charAt(actual_x));
 			}
 			while (actual_y > 0) {
 				actual_y--;
-				firstOutput = firstOutput + (" ");
-				secondOutput = secondOutput + (secondOutput.charAt(actual_y));
+				firstOutput.append(" ");
+				secondOutput.append(secondOutput.charAt(actual_y));
 			}
-			firstOutput = new StringBuilder(firstOutput).reverse().toString();
-			secondOutput = new StringBuilder(secondOutput).reverse().toString();
+			firstOutput = new StringBuilder(new StringBuilder(firstOutput.toString()).reverse().toString());
+			secondOutput = new StringBuilder(new StringBuilder(secondOutput.toString()).reverse().toString());
 			if (rnaToAminoAcids) {
-				firstOutput = reTranslateSequence(firstOutput);
-				secondOutput = reTranslateSequence(secondOutput);
+				firstOutput = new StringBuilder(SequenceUtils.reTranslateSequence(firstOutput.toString()));
+				secondOutput = new StringBuilder(SequenceUtils.reTranslateSequence(secondOutput.toString()));
 			}
-			resultsList.add(firstOutput);
-			resultsList.add(secondOutput);
+			resultsList.add(firstOutput.toString());
+			resultsList.add(secondOutput.toString());
 		}
 		return resultsList;
-	}
-
-	protected String reTranslateSequence(String sequence) {
-		String convertedSequence = "";
-		for (int i = 0; i < sequence.length(); i++) {
-			convertedSequence = convertedSequence + getAminoAcidKodon(sequence.substring(i, i + 1));
-		}
-		return convertedSequence;
-	}
-
-	private String getAminoAcidKodon(String aminoAcid) {
-		for (AminoAcidsTypes aminoAcidType : AminoAcidsTypes.values()) {
-			if (aminoAcid.equals(aminoAcidType.getAminoAcid())) {
-				return aminoAcidType.toString();
-			}
-		}
-		return "   ";
 	}
 
 	private boolean continueCondition(ArrayList<ArrayList<PointInTable>> lists) {
