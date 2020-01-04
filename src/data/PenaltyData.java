@@ -7,14 +7,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import static utils.SequenceUtils.getDistinctFromStrings;
+
 public class PenaltyData {
 	public String firstSequence;
 	public String secondSequence;
 	public int[][] similarityTable;
 	public ArrayList<String> alphabet;
-	public int firstSequenceLength;
-	public int secondSequenceLength;
-	public int ALPHABET_LENGTH;
 
 	public PenaltyData(String filePath) throws IOException {
 		readAndInitData(filePath);
@@ -26,20 +25,17 @@ public class PenaltyData {
 		firstSequence = scanner.nextLine();
 		secondSequence = scanner.nextLine();
 
-		ALPHABET_LENGTH = scanner.nextInt();
+		alphabet = getDistinctFromStrings(firstSequence, secondSequence);
 
-		similarityTable = new int[ALPHABET_LENGTH][ALPHABET_LENGTH];
-		for (int i = 0; i < ALPHABET_LENGTH; i++) {
-			for (int j = 0; j < ALPHABET_LENGTH; j++) {
+		int alphabetLength = alphabet.size();
+
+		similarityTable = new int[alphabetLength][alphabetLength];
+		for (int i = 0; i < alphabetLength; i++) {
+			for (int j = 0; j < alphabetLength; j++) {
 				similarityTable[i][j] = scanner.nextInt();
 			}
 		}
 
-		alphabet = new ArrayList<>();
-		for (int i = 0; i < ALPHABET_LENGTH; i++) alphabet.add(scanner.next());
-
-		firstSequenceLength = firstSequence.length();
-		secondSequenceLength = secondSequence.length();
 	}
 
 	public int getSimilarityBetweenElements(String a, String b) {

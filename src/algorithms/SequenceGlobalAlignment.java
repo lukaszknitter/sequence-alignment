@@ -18,20 +18,22 @@ public class SequenceGlobalAlignment {
 	}
 
 	public void compute() {
+		final String tableString = "Global";
+
 		fillScoringTable();
-		PrintUtils.printTable(mainTable);
+		PrintUtils.printTable(tableString, mainTable);
 		final ArrayList<ArrayList<PointInTable>> resultsList = calculateResults();
 		final ArrayList<String> resultsStringList = stringifyResultsList(resultsList);
-		PrintUtils.printResults(resultsStringList);
+		PrintUtils.printResults(tableString, resultsStringList);
 	}
 
 	private void fillScoringTable() {
-		final int firstSequenceLength = data.firstSequenceLength;
-		final int secondSequenceLength = data.secondSequenceLength;
+		final int firstSequenceLength = data.firstSequence.length();
+		final int secondSequenceLength = data.secondSequence.length();
 		final String firstSequence = data.firstSequence;
 		final String secondSequence = data.secondSequence;
 		final ArrayList<String> alphabet = data.alphabet;
-		final int ALPHABET_LENGTH = data.ALPHABET_LENGTH;
+		final int alphabetLength = alphabet.size();
 		final int[][] costTable = data.costTable;
 
 		mainTable = new MainTableElement[firstSequenceLength + 1][secondSequenceLength + 1];
@@ -39,12 +41,12 @@ public class SequenceGlobalAlignment {
 
 		for (int i = 1; i < secondSequenceLength + 1; i++) {
 			String actualChar = Character.toString(secondSequence.charAt(i - 1));
-			int value = mainTable[0][i - 1].getValue() + costTable[alphabet.indexOf(actualChar)][ALPHABET_LENGTH - 1];
+			int value = mainTable[0][i - 1].getValue() + costTable[alphabet.indexOf(actualChar)][alphabetLength - 1];
 			mainTable[0][i] = new MainTableElement(value, false, true, false);
 		}
 		for (int i = 1; i < firstSequenceLength + 1; i++) {
 			String actualChar = Character.toString(firstSequence.charAt(i - 1));
-			int value = mainTable[i - 1][0].getValue() + costTable[ALPHABET_LENGTH - 1][alphabet.indexOf(actualChar)];
+			int value = mainTable[i - 1][0].getValue() + costTable[alphabetLength - 1][alphabet.indexOf(actualChar)];
 			mainTable[i][0] = new MainTableElement(value, true, false, false);
 		}
 		for (int i = 1; i < firstSequenceLength + 1; i++) {
@@ -73,8 +75,8 @@ public class SequenceGlobalAlignment {
 	private ArrayList<ArrayList<PointInTable>> calculateResults() {
 		ArrayList<ArrayList<PointInTable>> list = new ArrayList<>();
 		ArrayList<PointInTable> localResult = new ArrayList<>();
-		int x = data.firstSequenceLength;
-		int y = data.secondSequenceLength;
+		int x = data.firstSequence.length();
+		int y = data.secondSequence.length();
 		PointInTable actualPoint = new PointInTable(x, y);
 		localResult.add(actualPoint);
 		list.add(localResult);
@@ -132,8 +134,8 @@ public class SequenceGlobalAlignment {
 	}
 
 	private ArrayList<String> stringifyResultsList(ArrayList<ArrayList<PointInTable>> lists) {
-		final int firstSequenceLength = data.firstSequenceLength;
-		final int secondSequenceLength = data.secondSequenceLength;
+		final int firstSequenceLength = data.firstSequence.length();
+		final int secondSequenceLength = data.secondSequence.length();
 		final String firstSequence = data.firstSequence;
 		final String secondSequence = data.secondSequence;
 		final boolean rnaToAminoAcids = data.rnaToAminoAcids;

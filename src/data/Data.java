@@ -10,15 +10,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import static utils.SequenceUtils.getDistinctFromStrings;
+
 public class Data {
 	public String firstSequence;
 	public String secondSequence;
 	public int[][] costTable;
 	public int[][] similarityTable;
 	public ArrayList<String> alphabet;
-	public int firstSequenceLength;
-	public int secondSequenceLength;
-	public int ALPHABET_LENGTH;
 	public boolean rnaToAminoAcids;
 
 	public Data(String filePath) throws IOException {
@@ -31,19 +30,10 @@ public class Data {
 		firstSequence = scanner.nextLine();
 		secondSequence = scanner.nextLine();
 
-		ALPHABET_LENGTH = scanner.nextInt();
 		rnaToAminoAcids = Boolean.parseBoolean(scanner.next());
 
-		costTable = new int[ALPHABET_LENGTH][ALPHABET_LENGTH];
-		similarityTable = new int[ALPHABET_LENGTH][ALPHABET_LENGTH];
-		for (int i = 0; i < ALPHABET_LENGTH; i++) {
-			for (int j = 0; j < ALPHABET_LENGTH; j++) {
-				costTable[i][j] = scanner.nextInt();
-				similarityTable[i][j] = 1 - costTable[i][j];
-			}
-		}
-		alphabet = new ArrayList<>();
 		if (rnaToAminoAcids) {
+			alphabet = new ArrayList<>();
 			Arrays.asList(AminoAcidsTypes.values()).forEach(aminoAcidType -> {
 				if (!alphabet.contains(aminoAcidType.getAminoAcid()))
 					alphabet.add(aminoAcidType.getAminoAcid());
@@ -51,12 +41,20 @@ public class Data {
 			firstSequence = SequenceUtils.convertSequence(firstSequence);
 			secondSequence = SequenceUtils.convertSequence(secondSequence);
 		} else {
-			for (int i = 0; i < ALPHABET_LENGTH - 1; i++) alphabet.add(scanner.next());
+			alphabet = getDistinctFromStrings(firstSequence, secondSequence);
 		}
 		alphabet.add(" ");
 
-		firstSequenceLength = firstSequence.length();
-		secondSequenceLength = secondSequence.length();
+		int alphabetLength = alphabet.size();
+
+		costTable = new int[alphabetLength][alphabetLength];
+		similarityTable = new int[alphabetLength][alphabetLength];
+		for (int i = 0; i < alphabetLength; i++) {
+			for (int j = 0; j < alphabetLength; j++) {
+				costTable[i][j] = scanner.nextInt();
+				similarityTable[i][j] = 1 - costTable[i][j];
+			}
+		}
 	}
 
 	public int getCostBetweenElements(String a, String b) {

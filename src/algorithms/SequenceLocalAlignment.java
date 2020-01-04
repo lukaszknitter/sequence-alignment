@@ -19,17 +19,19 @@ public class SequenceLocalAlignment {
 		this.data = new Data(filePath);
 	}
 
-	public void compute(){
+	public void compute() {
+		final String tableString = "Local";
+
 		fillScoringTable();
-		PrintUtils.printTable(mainTable);
+		PrintUtils.printTable(tableString, mainTable);
 		final ArrayList<ArrayList<PointInTable>> resultsList = calculateResults();
 		final ArrayList<String> resultsStringList = stringifyResultsList(resultsList);
-		PrintUtils.printResults(resultsStringList);
+		PrintUtils.printResults(tableString, resultsStringList);
 	}
 
 	public void fillScoringTable() {
-		final int firstSequenceLength = data.firstSequenceLength;
-		final int secondSequenceLength = data.secondSequenceLength;
+		final int firstSequenceLength = data.firstSequence.length();
+		final int secondSequenceLength = data.secondSequence.length();
 
 		mainTable = new MainTableElement[firstSequenceLength + 1][secondSequenceLength + 1];
 		mainTable[0][0] = new MainTableElement(0, false, false, false);
@@ -74,8 +76,8 @@ public class SequenceLocalAlignment {
 	public ArrayList<ArrayList<PointInTable>> calculateResults() {
 		ArrayList<ArrayList<PointInTable>> list = new ArrayList<>();
 		ArrayList<PointInTable> localResult;
-		for (int i = data.firstSequenceLength; i >= 0; i--) {
-			for (int j = data.secondSequenceLength; j >= 0; j--) {
+		for (int i = data.firstSequence.length(); i >= 0; i--) {
+			for (int j = data.secondSequence.length(); j >= 0; j--) {
 				if (mainTable[i][j].getValue() == this.max) {
 					PointInTable actualPoint = new PointInTable(i, j);
 					localResult = new ArrayList<>();
@@ -150,7 +152,7 @@ public class SequenceLocalAlignment {
 			for (PointInTable point : list) {
 				actual_x = point.getX();
 				actual_y = point.getY();
-				if (actual_x != data.firstSequenceLength || actual_y != data.secondSequenceLength) {
+				if (actual_x != data.firstSequence.length() || actual_y != data.secondSequence.length()) {
 
 					if (resent_x == actual_x) {
 						firstOutput.append(" ");

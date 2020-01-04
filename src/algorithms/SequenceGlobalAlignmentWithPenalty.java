@@ -17,11 +17,13 @@ public class SequenceGlobalAlignmentWithPenalty {
 	}
 
 	public void compute() {
+		final String tableString = "Global with penalty";
+
 		fillScoringTables();
-		PrintUtils.printTable(S);
+		PrintUtils.printTable(tableString, S);
 		final ArrayList<ArrayList<PointInTable>> resultsList = calculateResults();
 		final ArrayList<String> resultsStringList = stringifyResultsList(resultsList);
-		PrintUtils.printResults(resultsStringList);
+		PrintUtils.printResults(tableString, resultsStringList);
 	}
 
 	private int penaltyFunction(int n) {
@@ -29,8 +31,8 @@ public class SequenceGlobalAlignmentWithPenalty {
 	}
 
 	private void fillScoringTables() {
-		final int firstSequenceLength = data.firstSequenceLength;
-		final int secondSequenceLength = data.secondSequenceLength;
+		final int firstSequenceLength = data.firstSequence.length();
+		final int secondSequenceLength = data.secondSequence.length();
 		final String firstSequence = data.firstSequence;
 		final String secondSequence = data.secondSequence;
 
@@ -91,8 +93,8 @@ public class SequenceGlobalAlignmentWithPenalty {
 	private ArrayList<ArrayList<PointInTable>> calculateResults() {
 		ArrayList<ArrayList<PointInTable>> list = new ArrayList<>();
 		ArrayList<PointInTable> localResult = new ArrayList<>();
-		int x = data.firstSequenceLength;
-		int y = data.secondSequenceLength;
+		int x = data.firstSequence.length();
+		int y = data.secondSequence.length();
 		PointInTable actualPoint = new PointInTable(x, y);
 		localResult.add(actualPoint);
 		list.add(localResult);
@@ -150,8 +152,8 @@ public class SequenceGlobalAlignmentWithPenalty {
 	}
 
 	private ArrayList<String> stringifyResultsList(ArrayList<ArrayList<PointInTable>> lists) {
-		final int firstSequenceLength = data.firstSequenceLength;
-		final int secondSequenceLength = data.secondSequenceLength;
+		final int firstSequenceLength = data.firstSequence.length();
+		final int secondSequenceLength = data.secondSequence.length();
 		final String firstSequence = data.firstSequence;
 		final String secondSequence = data.secondSequence;
 

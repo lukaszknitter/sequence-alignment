@@ -5,8 +5,8 @@ import feature.MainTableElement;
 import java.util.ArrayList;
 
 public class PrintUtils {
-	public static void printTable(MainTableElement[][] table) {
-		System.out.println("Main global table:");
+	public static void printTable(String tableString, MainTableElement[][] table) {
+		System.out.println(tableString + " table:");
 		System.out.println("--------------------------");
 		for (int i = 0; i < table[0].length; i++) {
 			for (MainTableElement[] mainTableElements : table) {
@@ -17,8 +17,8 @@ public class PrintUtils {
 		System.out.println("--------------------------");
 	}
 
-	public static void printResults(ArrayList<String> resultsList) {
-		System.out.println("Global results: " + resultsList.size() / 2);
+	public static void printResults(String tableString,ArrayList<String> resultsList) {
+		System.out.println(tableString + " results: " + resultsList.size() / 2);
 		System.out.println("--------------------------");
 		int i = 0;
 		for (String item : resultsList) {
