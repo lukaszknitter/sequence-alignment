@@ -125,7 +125,6 @@ public class SequenceGlobalAlignmentWithPenalty {
 						ArrayList<PointInTable> clone = new ArrayList<>(localResult);
 						clone.add(new PointInTable(x - 1, y - 1));
 						list.add(clone);
-
 					} else {
 						actualPoint = new PointInTable(x - 1, y - 1);
 					}

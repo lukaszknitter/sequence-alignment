@@ -1,6 +1,7 @@
 package algorithms;
 
 import data.Data;
+import data.MeasureType;
 import feature.MainTableElement;
 import feature.PointInTable;
 import utils.PrintUtils;
@@ -51,12 +52,12 @@ public class SequenceGlobalAlignment {
 		}
 		for (int i = 1; i < firstSequenceLength + 1; i++) {
 			for (int j = 1; j < secondSequenceLength + 1; j++) {
-				mainTable[i][j] = findMin(i, j);
+				mainTable[i][j] = findMinOrMaxBasedOnMeasureType(i, j);
 			}
 		}
 	}
 
-	private MainTableElement findMin(int i, int j) {
+	private MainTableElement findMinOrMaxBasedOnMeasureType(int i, int j) {
 		String actualCharFirstSq = Character.toString(data.firstSequence.charAt(i - 1));
 		String actualCharSecondSq = Character.toString(data.secondSequence.charAt(j - 1));
 
@@ -67,9 +68,14 @@ public class SequenceGlobalAlignment {
 		int diagonalCost = costBtwChars + mainTable[i - 1][j - 1].getValue();
 		int left = leftCost + mainTable[i - 1][j].getValue();
 		int up = upCost + mainTable[i][j - 1].getValue();
-		int value = Math.min(diagonalCost, Math.min(left, up));
 
-		return new MainTableElement(value, left == value, up == value, diagonalCost == value);
+		if (data.measureType.equals(MeasureType.DISTANCE)) {
+			int min = Math.min(diagonalCost, Math.min(left, up));
+			return new MainTableElement(min, left == min, up == min, diagonalCost == min);
+		} else {
+			int max = Math.max(diagonalCost, Math.max(left, up));
+			return new MainTableElement(max, left == max, up == max, diagonalCost == max);
+		}
 	}
 
 	private ArrayList<ArrayList<PointInTable>> calculateResults() {

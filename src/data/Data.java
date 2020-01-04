@@ -13,6 +13,7 @@ import java.util.Scanner;
 import static utils.SequenceUtils.getDistinctFromStrings;
 
 public class Data {
+	public MeasureType measureType;
 	public String firstSequence;
 	public String secondSequence;
 	public int[][] costTable;
@@ -27,6 +28,8 @@ public class Data {
 	public void readAndInitData(String filePathString) throws IOException {
 		Path filePath = Paths.get(filePathString);
 		Scanner scanner = new Scanner(filePath);
+		measureType = MeasureType.valueOf(scanner.nextLine());
+
 		firstSequence = scanner.nextLine();
 		secondSequence = scanner.nextLine();
 
