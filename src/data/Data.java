@@ -16,7 +16,8 @@ public class Data {
 	public MeasureType measureType;
 	public String firstSequence;
 	public String secondSequence;
-	public int[][] costTable;
+	public int[][] distanceTable;
+	public int[][] similarityTable;
 	public ArrayList<String> alphabet;
 	public boolean rnaToAminoAcids;
 
@@ -49,16 +50,26 @@ public class Data {
 
 		int alphabetLength = alphabet.size();
 
-		costTable = new int[alphabetLength][alphabetLength];
+		distanceTable = new int[alphabetLength][alphabetLength];
+		similarityTable = new int[alphabetLength][alphabetLength];
 		for (int i = 0; i < alphabetLength; i++) {
 			for (int j = 0; j < alphabetLength; j++) {
-				costTable[i][j] = scanner.nextInt();
+				if (measureType.equals(MeasureType.DISTANCE)) {
+					distanceTable[i][j] = scanner.nextInt();
+					similarityTable[i][j] = 1 - distanceTable[i][j];
+				} else {
+					similarityTable[i][j] = scanner.nextInt();
+				}
 			}
 		}
 	}
 
-	public int getCostBetweenElements(String a, String b) {
-		return costTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
+	public int getDistanceBetweenElements(String a, String b) {
+		return distanceTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
+	}
+
+	public int getSimilarityBetweenElements(String a, String b) {
+		return similarityTable[alphabet.indexOf(a)][alphabet.indexOf(b)];
 	}
 }
 

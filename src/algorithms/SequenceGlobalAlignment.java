@@ -35,7 +35,7 @@ public class SequenceGlobalAlignment {
 		final String secondSequence = data.secondSequence;
 		final ArrayList<String> alphabet = data.alphabet;
 		final int alphabetLength = alphabet.size();
-		final int[][] costTable = data.costTable;
+		final int[][] costTable = data.distanceTable;
 
 		mainTable = new MainTableElement[firstSequenceLength + 1][secondSequenceLength + 1];
 		mainTable[0][0] = new MainTableElement(0, false, false, false);
@@ -58,24 +58,43 @@ public class SequenceGlobalAlignment {
 	}
 
 	private MainTableElement findMinOrMaxBasedOnMeasureType(int i, int j) {
+		if (data.measureType.equals(MeasureType.DISTANCE)) {
+			return findMin(i, j);
+		} else {
+			return findMax(i, j);
+		}
+	}
+
+	private MainTableElement findMin(int i, int j) {
 		String actualCharFirstSq = Character.toString(data.firstSequence.charAt(i - 1));
 		String actualCharSecondSq = Character.toString(data.secondSequence.charAt(j - 1));
 
-		int costBtwChars = data.getCostBetweenElements(actualCharFirstSq, actualCharSecondSq);
-		int leftCost = data.getCostBetweenElements(actualCharFirstSq, " ");
-		int upCost = data.getCostBetweenElements(" ", actualCharSecondSq);
+		int costBtwChars = data.getDistanceBetweenElements(actualCharFirstSq, actualCharSecondSq);
+		int leftCost = data.getDistanceBetweenElements(actualCharFirstSq, " ");
+		int upCost = data.getDistanceBetweenElements(" ", actualCharSecondSq);
 
 		int diagonalCost = costBtwChars + mainTable[i - 1][j - 1].getValue();
 		int left = leftCost + mainTable[i - 1][j].getValue();
 		int up = upCost + mainTable[i][j - 1].getValue();
 
-		if (data.measureType.equals(MeasureType.DISTANCE)) {
-			int min = Math.min(diagonalCost, Math.min(left, up));
-			return new MainTableElement(min, left == min, up == min, diagonalCost == min);
-		} else {
-			int max = Math.max(diagonalCost, Math.max(left, up));
-			return new MainTableElement(max, left == max, up == max, diagonalCost == max);
-		}
+		int min = Math.min(diagonalCost, Math.min(left, up));
+		return new MainTableElement(min, left == min, up == min, diagonalCost == min);
+	}
+
+	private MainTableElement findMax(int i, int j) {
+		String actualCharFirstSq = Character.toString(data.firstSequence.charAt(i - 1));
+		String actualCharSecondSq = Character.toString(data.secondSequence.charAt(j - 1));
+
+		int costBtwChars = data.getSimilarityBetweenElements(actualCharFirstSq, actualCharSecondSq);
+		int leftCost = data.getSimilarityBetweenElements(actualCharFirstSq, " ");
+		int upCost = data.getSimilarityBetweenElements(" ", actualCharSecondSq);
+
+		int diagonalCost = costBtwChars + mainTable[i - 1][j - 1].getValue();
+		int left = leftCost + mainTable[i - 1][j].getValue();
+		int up = upCost + mainTable[i][j - 1].getValue();
+
+		int max = Math.max(diagonalCost, Math.max(left, up));
+		return new MainTableElement(max, left == max, up == max, diagonalCost == max);
 	}
 
 	private ArrayList<ArrayList<PointInTable>> calculateResults() {

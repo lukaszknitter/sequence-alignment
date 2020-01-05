@@ -38,7 +38,6 @@ public class PenaltyData {
 				similarityTable[i][j] = scanner.nextInt();
 			}
 		}
-
 	}
 
 	public int getSimilarityBetweenElements(String a, String b) {

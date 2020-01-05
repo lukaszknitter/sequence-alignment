@@ -58,9 +58,9 @@ public class SequenceLocalAlignment {
 		String actualCharFirstSq = Character.toString(data.firstSequence.charAt(i - 1));
 		String actualCharSecondSq = Character.toString(data.secondSequence.charAt(j - 1));
 
-		int costBtwChars = data.getCostBetweenElements(actualCharFirstSq, actualCharSecondSq);
-		int leftCost = data.getCostBetweenElements(actualCharFirstSq, " ");
-		int upCost = data.getCostBetweenElements(" ", actualCharSecondSq);
+		int costBtwChars = data.getSimilarityBetweenElements(actualCharFirstSq, actualCharSecondSq);
+		int leftCost = data.getSimilarityBetweenElements(actualCharFirstSq, " ");
+		int upCost = data.getSimilarityBetweenElements(" ", actualCharSecondSq);
 
 		int diagonalCost = costBtwChars + mainTable[i - 1][j - 1].getValue();
 		int left = leftCost + mainTable[i - 1][j].getValue();
