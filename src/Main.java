@@ -21,7 +21,7 @@ public class Main {
         SequenceLocalAlignment local = new SequenceLocalAlignment("resources//test_local.txt");
         local.compute();
 
-        SequenceGlobalAlignmentWithPenalty globalWithPenalty = new SequenceGlobalAlignmentWithPenalty("resources//test_penalty.txt");
+        SequenceGlobalAlignmentWithPenalty globalWithPenalty = new SequenceGlobalAlignmentWithPenalty("resources//test_penalty2.txt");
         globalWithPenalty.compute();
     }
 }
