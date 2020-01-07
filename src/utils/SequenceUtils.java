@@ -3,6 +3,7 @@ package utils;
 import feature.AminoAcidsTypes;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,6 +47,7 @@ public class SequenceUtils {
 		for (char c : charsSet) {
 			result.add(String.valueOf(c));
 		}
+		result.sort(Comparator.naturalOrder());
 		return result;
 	}
 }
