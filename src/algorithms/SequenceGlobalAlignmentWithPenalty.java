@@ -27,7 +27,7 @@ public class SequenceGlobalAlignmentWithPenalty {
 	}
 
 	private int penaltyFunction(int n) {
-		return 2 * n;
+		return 2 * n + 100;
 	}
 
 	private void fillScoringTables() {
